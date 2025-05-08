@@ -6,8 +6,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<h1>Welcome to the Main Page</h1>} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/" element={<AdminPage />} />
       </Routes>
     </Router>
   );
