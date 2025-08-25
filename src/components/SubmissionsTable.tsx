@@ -14,14 +14,13 @@ interface Submission {
 // Interface untuk filter
 interface Filters {
   nama: string;
-  kelas: string;
 }
 
 const SubmissionsTable = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<Submission[]>([]);
-  const [filters, setFilters] = useState<Filters>({ nama: "", kelas: "" });
+  const [filters, setFilters] = useState<Filters>({ nama: "" });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,15 +61,12 @@ const SubmissionsTable = () => {
   };
 
   const filterData = (filters: Filters) => {
-    const { nama, kelas } = filters;
+    const { nama } = filters;
     const filtered = data.filter((item) => {
       const matchesNama = nama
         ? item.nama.toLowerCase().includes(nama.toLowerCase())
         : true;
-      const matchesKelas = kelas
-        ? item.kelas.toLowerCase().includes(kelas.toLowerCase())
-        : true;
-      return matchesNama && matchesKelas;
+      return matchesNama;
     });
     setFilteredData(filtered);
   };
@@ -84,7 +80,8 @@ const SubmissionsTable = () => {
     setFilteredData(sortedData);
   };
 
-  const handleDelete = async (id: number) => {
+  // ✅ ganti id ke string
+  const handleDelete = async (id: string) => {
     try {
       const { error } = await supa.from("submissions").delete().eq("id", id);
       if (error) {
@@ -112,21 +109,13 @@ const SubmissionsTable = () => {
           onChange={(e) => handleFilterChange(e, "nama")}
           className="filter-input"
         />
-        <input
-          type="text"
-          placeholder="Filter Kelas"
-          value={filters.kelas}
-          onChange={(e) => handleFilterChange(e, "kelas")}
-          className="filter-input"
-        />
       </div>
       <table className="styled-table">
         <thead>
           <tr>
             <th onClick={() => handleSort("absen")}>No Absen</th>
             <th onClick={() => handleSort("nama")}>Nama</th>
-            <th onClick={() => handleSort("test_type")}>Tipe Test</th>{" "}
-            {/* ✅ baru */}
+            <th onClick={() => handleSort("test_type")}>Tipe Test</th>
             <th onClick={() => handleSort("score")}>Score</th>
             <th onClick={() => handleSort("created_at")}>Tanggal Pengajuan</th>
             <th>Aksi</th>
@@ -137,7 +126,7 @@ const SubmissionsTable = () => {
             <tr key={row.id} className="table-row">
               <td>{row.absen}</td>
               <td>{row.nama}</td>
-              <td>{row.test_type}</td> {/* ✅ tampilkan */}
+              <td>{row.test_type}</td>
               <td>{row.score}</td>
               <td>{row.created_at}</td>
               <td>
