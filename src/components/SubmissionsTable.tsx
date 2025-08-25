@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { supa } from '../lib/supa'; // Ensure the path to supa is correct
+import { useState, useEffect } from "react";
+import { supa } from "../lib/supa";
 
-// Interface for the data structure
+// Interface untuk data
 interface Submission {
-  id: number;
-  absen: string;
-  nama: string;
-  score: number;
-  created_at: string;
-  kelas: string;
+  id: string; // uuid
+  nama: string; // text
+  absen: number; // int4
+  score: number; // int4
+  created_at: string; // timestamptz
+  test_type: string; // text
 }
 
-// Interface for filters
+// Interface untuk filter
 interface Filters {
   nama: string;
   kelas: string;
@@ -21,24 +21,24 @@ const SubmissionsTable = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<Submission[]>([]);
-  const [filters, setFilters] = useState<Filters>({ nama: '', kelas: '' });
+  const [filters, setFilters] = useState<Filters>({ nama: "", kelas: "" });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data: fetchedData, error } = await supa
-          .from('submissions')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
+          .from("submissions")
+          .select("*")
+          .order("created_at", { ascending: false });
+
         if (error) {
           console.error("Error fetching data: ", error.message);
           setLoading(false);
           return;
         }
-        
-        setData(fetchedData || []); // Ensure data is not null
-        setFilteredData(fetchedData || []); // Initialize filteredData
+
+        setData(fetchedData || []);
+        setFilteredData(fetchedData || []);
         setLoading(false);
       } catch (err) {
         console.error("Error during fetch: ", err);
@@ -49,11 +49,14 @@ const SubmissionsTable = () => {
     fetchData();
   }, []);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Filters) => {
+  const handleFilterChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof Filters
+  ) => {
     const value = e.target.value;
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters, [field]: value };
-      filterData(newFilters); // Apply filter immediately
+      filterData(newFilters);
       return newFilters;
     });
   };
@@ -61,8 +64,12 @@ const SubmissionsTable = () => {
   const filterData = (filters: Filters) => {
     const { nama, kelas } = filters;
     const filtered = data.filter((item) => {
-      const matchesNama = nama ? item.nama.toLowerCase().includes(nama.toLowerCase()) : true;
-      const matchesKelas = kelas ? item.kelas.toLowerCase().includes(kelas.toLowerCase()) : true;
+      const matchesNama = nama
+        ? item.nama.toLowerCase().includes(nama.toLowerCase())
+        : true;
+      const matchesKelas = kelas
+        ? item.kelas.toLowerCase().includes(kelas.toLowerCase())
+        : true;
       return matchesNama && matchesKelas;
     });
     setFilteredData(filtered);
@@ -79,14 +86,12 @@ const SubmissionsTable = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      // Delete data from the database using Supabase
-      const { error } = await supa.from('submissions').delete().eq('id', id);
+      const { error } = await supa.from("submissions").delete().eq("id", id);
       if (error) {
         console.error("Error deleting data: ", error.message);
         return;
       }
 
-      // Remove data from local state
       setData(data.filter((item) => item.id !== id));
       setFilteredData(filteredData.filter((item) => item.id !== id));
     } catch (err) {
@@ -104,34 +109,37 @@ const SubmissionsTable = () => {
           type="text"
           placeholder="Filter Nama"
           value={filters.nama}
-          onChange={(e) => handleFilterChange(e, 'nama')}
+          onChange={(e) => handleFilterChange(e, "nama")}
           className="filter-input"
         />
         <input
           type="text"
           placeholder="Filter Kelas"
           value={filters.kelas}
-          onChange={(e) => handleFilterChange(e, 'kelas')}
+          onChange={(e) => handleFilterChange(e, "kelas")}
           className="filter-input"
         />
       </div>
       <table className="styled-table">
         <thead>
           <tr>
-            <th onClick={() => handleSort('absen')}>No Absen</th>
-            <th onClick={() => handleSort('nama')}>Nama</th>
-            <th onClick={() => handleSort('score')}>Score</th>
-            <th onClick={() => handleSort('created_at')}>Tanggal Pengajuan</th>
+            <th onClick={() => handleSort("absen")}>No Absen</th>
+            <th onClick={() => handleSort("nama")}>Nama</th>
+            <th onClick={() => handleSort("test_type")}>Tipe Test</th>{" "}
+            {/* ✅ baru */}
+            <th onClick={() => handleSort("score")}>Score</th>
+            <th onClick={() => handleSort("created_at")}>Tanggal Pengajuan</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           {filteredData.map((row) => (
             <tr key={row.id} className="table-row">
-              <td>{row.absen}</td> {/* Menampilkan No Absen */}
-              <td>{row.nama}</td> {/* Menampilkan Nama */}
-              <td>{row.score}</td> {/* Menampilkan Score */}
-              <td>{row.created_at}</td> {/* Menampilkan Tanggal Pengajuan */}
+              <td>{row.absen}</td>
+              <td>{row.nama}</td>
+              <td>{row.test_type}</td> {/* ✅ tampilkan */}
+              <td>{row.score}</td>
+              <td>{row.created_at}</td>
               <td>
                 <button
                   onClick={() => handleDelete(row.id)}
