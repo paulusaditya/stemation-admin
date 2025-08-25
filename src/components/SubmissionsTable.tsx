@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { supa } from "../lib/supa";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 // Interface untuk data
 interface Submission {
@@ -96,11 +98,33 @@ const SubmissionsTable = () => {
     }
   };
 
+  // ✅ fungsi export Excel
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Submissions");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const dataBlob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(dataBlob, "submissions.xlsx");
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
     <div className="table-container">
-      <h1 className="title">Submissions Table STEMation</h1>
+      <div className="header flex justify-between items-center">
+        <h1 className="title">Submissions Table STEMation</h1>
+        <button onClick={exportToExcel} className="download-button">
+          📥 Download Excel
+        </button>
+      </div>
+
       <div className="filters">
         <input
           type="text"
@@ -110,6 +134,7 @@ const SubmissionsTable = () => {
           className="filter-input"
         />
       </div>
+
       <table className="styled-table">
         <thead>
           <tr>
